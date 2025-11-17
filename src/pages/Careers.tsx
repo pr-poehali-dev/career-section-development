@@ -72,6 +72,7 @@ const jobs: Job[] = [
 
 const Careers = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>('Все');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const departments = ['Все', ...Array.from(new Set(jobs.map(job => job.department)))];
@@ -80,13 +81,53 @@ const Careers = () => {
     ? jobs 
     : jobs.filter(job => job.department === selectedDepartment);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>, formType: string) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formType: string) => {
     e.preventDefault();
-    toast({
-      title: 'Анкета отправлена',
-      description: `Ваша анкета ${formType === 'student' ? 'студента' : 'соискателя'} успешно отправлена. Мы свяжемся с вами в ближайшее время.`,
-    });
-    (e.target as HTMLFormElement).reset();
+    setIsSubmitting(true);
+
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get('name') as string;
+    const surname = formData.get('surname') as string;
+    const email = formData.get('email') as string;
+
+    try {
+      const response = await fetch('https://functions.poehali.dev/e84fc33a-bb8b-4280-a36d-a69de81a66d9', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          surname,
+          email,
+          application_type: formType
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: 'Анкета отправлена',
+          description: `Письмо отправлено на ${email}. Проверьте почту для подтверждения.`,
+        });
+        (e.target as HTMLFormElement).reset();
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: result.error || 'Не удалось отправить анкету. Попробуйте позже.',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось отправить анкету. Проверьте соединение.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -255,17 +296,17 @@ const Careers = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="app-name">Имя *</Label>
-                      <Input id="app-name" placeholder="Иван" required />
+                      <Input id="app-name" name="name" placeholder="Иван" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="app-surname">Фамилия *</Label>
-                      <Input id="app-surname" placeholder="Иванов" required />
+                      <Input id="app-surname" name="surname" placeholder="Иванов" required />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="app-email">Email *</Label>
-                    <Input id="app-email" type="email" placeholder="ivan@example.com" required />
+                    <Input id="app-email" name="email" type="email" placeholder="ivan@example.com" required />
                   </div>
 
                   <div className="space-y-2">
@@ -298,9 +339,9 @@ const Careers = () => {
                     <Input id="app-portfolio" type="url" placeholder="https://..." />
                   </div>
 
-                  <Button type="submit" className="w-full" size="lg">
+                  <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
                     <Icon name="Send" size={20} className="mr-2" />
-                    Отправить анкету
+                    {isSubmitting ? 'Отправка...' : 'Отправить анкету'}
                   </Button>
                 </form>
               </TabsContent>
@@ -310,17 +351,17 @@ const Careers = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="stu-name">Имя *</Label>
-                      <Input id="stu-name" placeholder="Мария" required />
+                      <Input id="stu-name" name="name" placeholder="Мария" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="stu-surname">Фамилия *</Label>
-                      <Input id="stu-surname" placeholder="Петрова" required />
+                      <Input id="stu-surname" name="surname" placeholder="Петрова" required />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="stu-email">Email *</Label>
-                    <Input id="stu-email" type="email" placeholder="maria@example.com" required />
+                    <Input id="stu-email" name="email" type="email" placeholder="maria@example.com" required />
                   </div>
 
                   <div className="space-y-2">
@@ -364,9 +405,9 @@ const Careers = () => {
                     <Input id="stu-portfolio" type="url" placeholder="https://..." />
                   </div>
 
-                  <Button type="submit" className="w-full" size="lg">
+                  <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
                     <Icon name="Send" size={20} className="mr-2" />
-                    Отправить анкету студента
+                    {isSubmitting ? 'Отправка...' : 'Отправить анкету студента'}
                   </Button>
                 </form>
               </TabsContent>

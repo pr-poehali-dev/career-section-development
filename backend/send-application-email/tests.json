@@ -1,0 +1,51 @@
+{
+  "tests": [
+    {
+      "name": "Send applicant confirmation email",
+      "method": "POST",
+      "body": {
+        "name": "Иван",
+        "surname": "Иванов",
+        "email": "test@example.com",
+        "application_type": "applicant"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "message": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Send student confirmation email",
+      "method": "POST",
+      "body": {
+        "name": "Мария",
+        "surname": "Петрова",
+        "email": "student@example.com",
+        "application_type": "student"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Reject invalid email",
+      "method": "POST",
+      "body": {
+        "name": "Test",
+        "surname": "User",
+        "email": "invalid-email",
+        "application_type": "applicant"
+      },
+      "expectedStatus": 422
+    },
+    {
+      "name": "Handle OPTIONS for CORS",
+      "method": "OPTIONS",
+      "expectedStatus": 200
+    }
+  ]
+}
