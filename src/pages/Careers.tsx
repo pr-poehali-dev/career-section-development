@@ -86,22 +86,36 @@ const Careers = () => {
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
-    const name = formData.get('name') as string;
-    const surname = formData.get('surname') as string;
-    const email = formData.get('email') as string;
+    
+    const payload: any = {
+      application_type: formType,
+      name: formData.get('name') as string,
+      surname: formData.get('surname') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string,
+    };
+
+    if (formType === 'applicant') {
+      payload.position = formData.get('position') as string;
+      payload.experience = parseInt(formData.get('experience') as string);
+      payload.cover_letter = formData.get('cover_letter') as string;
+      payload.portfolio_url = formData.get('portfolio_url') as string || null;
+    } else {
+      payload.university = formData.get('university') as string;
+      payload.course = parseInt(formData.get('course') as string);
+      payload.specialty = formData.get('specialty') as string;
+      payload.direction = formData.get('direction') as string;
+      payload.motivation_letter = formData.get('motivation_letter') as string;
+      payload.portfolio_url = formData.get('portfolio_url') as string || null;
+    }
 
     try {
-      const response = await fetch('https://functions.poehali.dev/e84fc33a-bb8b-4280-a36d-a69de81a66d9', {
+      const response = await fetch('https://functions.poehali.dev/31db2cf7-bec4-48ca-8654-db4fcedb4ab7', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name,
-          surname,
-          email,
-          application_type: formType
-        })
+        body: JSON.stringify(payload)
       });
 
       const result = await response.json();
@@ -109,7 +123,9 @@ const Careers = () => {
       if (response.ok) {
         toast({
           title: 'Анкета отправлена',
-          description: `Письмо отправлено на ${email}. Проверьте почту для подтверждения.`,
+          description: result.email_sent 
+            ? `Анкета сохранена! Письмо отправлено на ${payload.email}`
+            : 'Анкета сохранена! Мы свяжемся с вами в ближайшее время.',
         });
         (e.target as HTMLFormElement).reset();
       } else {
@@ -311,23 +327,24 @@ const Careers = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="app-phone">Телефон *</Label>
-                    <Input id="app-phone" type="tel" placeholder="+7 (999) 123-45-67" required />
+                    <Input id="app-phone" name="phone" type="tel" placeholder="+7 (999) 123-45-67" required />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="app-position">Желаемая позиция *</Label>
-                    <Input id="app-position" placeholder="Frontend Developer" required />
+                    <Input id="app-position" name="position" placeholder="Frontend Developer" required />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="app-experience">Опыт работы (в годах) *</Label>
-                    <Input id="app-experience" type="number" min="0" placeholder="3" required />
+                    <Input id="app-experience" name="experience" type="number" min="0" placeholder="3" required />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="app-cover">Сопроводительное письмо *</Label>
                     <Textarea
                       id="app-cover"
+                      name="cover_letter"
                       placeholder="Расскажите о себе и почему вы хотите работать у нас..."
                       className="min-h-32"
                       required
@@ -336,7 +353,7 @@ const Careers = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="app-portfolio">Ссылка на портфолио/LinkedIn</Label>
-                    <Input id="app-portfolio" type="url" placeholder="https://..." />
+                    <Input id="app-portfolio" name="portfolio_url" type="url" placeholder="https://..." />
                   </div>
 
                   <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
@@ -366,34 +383,35 @@ const Careers = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="stu-phone">Телефон *</Label>
-                    <Input id="stu-phone" type="tel" placeholder="+7 (999) 123-45-67" required />
+                    <Input id="stu-phone" name="phone" type="tel" placeholder="+7 (999) 123-45-67" required />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="stu-university">Университет *</Label>
-                    <Input id="stu-university" placeholder="МГУ им. М.В. Ломоносова" required />
+                    <Input id="stu-university" name="university" placeholder="МГУ им. М.В. Ломоносова" required />
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="stu-course">Курс *</Label>
-                      <Input id="stu-course" type="number" min="1" max="6" placeholder="3" required />
+                      <Input id="stu-course" name="course" type="number" min="1" max="6" placeholder="3" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="stu-specialty">Специальность *</Label>
-                      <Input id="stu-specialty" placeholder="Информатика" required />
+                      <Input id="stu-specialty" name="specialty" placeholder="Информатика" required />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="stu-direction">Интересующее направление *</Label>
-                    <Input id="stu-direction" placeholder="Frontend-разработка, Дизайн, Аналитика..." required />
+                    <Input id="stu-direction" name="direction" placeholder="Frontend-разработка, Дизайн, Аналитика..." required />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="stu-motivation">Мотивационное письмо *</Label>
                     <Textarea
                       id="stu-motivation"
+                      name="motivation_letter"
                       placeholder="Расскажите, почему хотите пройти стажировку у нас..."
                       className="min-h-32"
                       required
@@ -402,7 +420,7 @@ const Careers = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="stu-portfolio">Ссылка на портфолио/проекты</Label>
-                    <Input id="stu-portfolio" type="url" placeholder="https://..." />
+                    <Input id="stu-portfolio" name="portfolio_url" type="url" placeholder="https://..." />
                   </div>
 
                   <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>

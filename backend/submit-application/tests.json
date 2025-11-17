@@ -1,0 +1,67 @@
+{
+  "tests": [
+    {
+      "name": "Submit applicant application",
+      "method": "POST",
+      "body": {
+        "application_type": "applicant",
+        "name": "Иван",
+        "surname": "Иванов",
+        "email": "test@example.com",
+        "phone": "+79991234567",
+        "position": "Frontend Developer",
+        "experience": 3,
+        "cover_letter": "Хочу работать в вашей компании",
+        "portfolio_url": "https://portfolio.com"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "application_id": "number"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Submit student application",
+      "method": "POST",
+      "body": {
+        "application_type": "student",
+        "name": "Мария",
+        "surname": "Петрова",
+        "email": "student@example.com",
+        "phone": "+79991234567",
+        "university": "МГУ",
+        "course": 3,
+        "specialty": "Информатика",
+        "direction": "Frontend",
+        "motivation_letter": "Хочу пройти стажировку"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "application_id": "number"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Reject invalid email",
+      "method": "POST",
+      "body": {
+        "application_type": "applicant",
+        "name": "Test",
+        "surname": "User",
+        "email": "invalid-email",
+        "phone": "+79991234567",
+        "position": "Developer",
+        "experience": 1,
+        "cover_letter": "Test"
+      },
+      "expectedStatus": 422
+    },
+    {
+      "name": "Handle OPTIONS for CORS",
+      "method": "OPTIONS",
+      "expectedStatus": 200
+    }
+  ]
+}
